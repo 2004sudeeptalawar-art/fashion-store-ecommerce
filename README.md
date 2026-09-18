@@ -69,8 +69,8 @@ fashion store/
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/2004sudeeptalawar-art/fashion-store.git
-cd fashion-store
+git clone https://github.com/2004sudeeptalawar-art/fashion-store-ecommerce-web-application.git
+cd fashion-store-ecommerce-web-application
 ```
 
 ### 2. Create and Activate a Virtual Environment
