@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Create Account | {{ store_name }}{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 3rem; padding-bottom: 6rem; max-width: 580px;">
+
+  <div class="card" style="padding: 2.5rem;">
+    <div style="text-align: center; margin-bottom: 2rem;">
+      <span class="badge badge-gold" style="margin-bottom: 0.75rem;">NEW PATRON PRIVILEGES</span>
+      <h1 style="font-size: 2.2rem; color: #fff; margin-bottom: 0.5rem;">Join {{ store_name }}</h1>
+      <p style="color: var(--text-secondary); font-size: 0.9rem;">
+        Register to unlock private runway previews, express checkout, and tailored recommendations.
+      </p>
+    </div>
+
+    <form method="POST" action="{{ url_for('register') }}">
+      <div class="form-group">
+        <label class="form-label">Full Name *</label>
+        <input type="text" name="full_name" required placeholder="E.g. Charlotte DuPont" class="form-control">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Email Address *</label>
+        <input type="email" name="email" required placeholder="name@domain.com" class="form-control">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Phone Number</label>
+        <input type="text" name="phone" placeholder="+91 98765 43210" class="form-control">
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label class="form-label">Password *</label>
+          <input type="password" name="password" required placeholder="••••••••" class="form-control">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirm Password *</label>
+          <input type="password" name="confirm_password" required placeholder="••••••••" class="form-control">
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 1rem;">
+        Create Atelier Account ➔
+      </button>
+    </form>
+
+    <div style="text-align: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-subtle); font-size: 0.88rem; color: var(--text-secondary);">
+      Already have an account? 
+      <a href="{{ url_for('login') }}" style="color: var(--gold-light); font-weight: 600; text-decoration: underline;">
+        Sign In
+      </a>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

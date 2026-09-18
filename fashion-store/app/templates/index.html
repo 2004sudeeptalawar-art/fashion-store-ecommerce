@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fashion Store</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    {% include 'base.html' %}
+    <header>
+        <h1>Welcome to the Fashion Store</h1>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('products.index') }}">Products</a></li>
+                <li><a href="{{ url_for('cart.view') }}">Cart</a></li>
+                <li><a href="{{ url_for('auth.login') }}">Login</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section>
+            <h2>Featured Products</h2>
+            <div id="featured-products">
+                <!-- Featured products will be dynamically loaded here -->
+            </div>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2023 Fashion Store. All rights reserved.</p>
+    </footer>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

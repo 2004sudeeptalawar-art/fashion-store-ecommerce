@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Sign In | {{ store_name }}{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 3rem; padding-bottom: 6rem; max-width: 540px;">
+
+  <div class="card" style="padding: 2.5rem;">
+    <div style="text-align: center; margin-bottom: 2rem;">
+      <span class="badge badge-gold" style="margin-bottom: 0.75rem;">CLIENT PORTAL</span>
+      <h1 style="font-size: 2.2rem; color: #fff; margin-bottom: 0.5rem;">Sign In to Atelier</h1>
+      <p style="color: var(--text-secondary); font-size: 0.9rem;">
+        Access your saved wishlist, order archives, and bespoke concierge.
+      </p>
+    </div>
+
+    <!-- Quick Demo Credential Autofill Buttons -->
+    <div style="background: var(--bg-surface-elevated); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); margin-bottom: 1.5rem; font-size: 0.8rem;">
+      <strong style="color: var(--gold-light); display: block; margin-bottom: 0.5rem;">⚡ Quick Demo Login Credentials:</strong>
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('loginEmail').value='sophia@example.com'; document.getElementById('loginPassword').value='user123';">
+          Demo Patron (Sophia)
+        </button>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('loginEmail').value='admin@vogue.com'; document.getElementById('loginPassword').value='admin123';">
+          Demo Administrator
+        </button>
+      </div>
+    </div>
+
+    <form method="POST" action="{{ url_for('login', next=request.args.get('next')) }}">
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" id="loginEmail" name="email" required placeholder="name@domain.com" class="form-control">
+      </div>
+
+      <div class="form-group">
+        <div class="flex-between">
+          <label class="form-label">Password</label>
+          <a href="#" onclick="event.preventDefault(); showToast('Demo password: user123 or admin123', 'info');" style="font-size: 0.75rem; color: var(--gold-light); text-decoration: underline;">Forgot Password?</a>
+        </div>
+        <input type="password" id="loginPassword" name="password" required placeholder="••••••••" class="form-control">
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 1rem;">
+        Authenticate ➔
+      </button>
+    </form>
+
+    <div style="text-align: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-subtle); font-size: 0.88rem; color: var(--text-secondary);">
+      New to {{ store_name }}? 
+      <a href="{{ url_for('register') }}" style="color: var(--gold-light); font-weight: 600; text-decoration: underline;">
+        Create an Account
+      </a>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

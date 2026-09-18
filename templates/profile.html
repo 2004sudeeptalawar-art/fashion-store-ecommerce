@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile | {{ store_name }}{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2.5rem; padding-bottom: 5rem;">
+
+  <div style="margin-bottom: 2.5rem;">
+    <span class="section-subtitle">MEMBERSHIP HUB</span>
+    <h1 style="font-size: 2.75rem; color: #fff; margin-bottom: 0.5rem;">Patron Account & Settings</h1>
+    <p style="color: var(--text-secondary);">Manage personal credentials, review security settings, and inspect your private archives.</p>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 3rem; align-items: start;">
+    
+    <!-- User Card -->
+    <div class="card" style="text-align: center; padding: 2rem;">
+      <div style="width: 90px; height: 90px; border-radius: 50%; overflow: hidden; margin: 0 auto 1rem auto; border: 2px solid var(--border-gold);">
+        <img src="{{ user.avatar_url }}" alt="{{ user.full_name }}" style="width: 100%; height: 100%; object-fit: cover;">
+      </div>
+      <h3 style="font-size: 1.35rem; color: #fff;">{{ user.full_name }}</h3>
+      <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">{{ user.email }}</div>
+      
+      {% if user.is_admin %}
+      <span class="badge badge-gold" style="margin-bottom: 1rem;">System Administrator</span>
+      {% else %}
+      <span class="badge badge-outline" style="margin-bottom: 1rem;">VIP Atelier Patron</span>
+      {% endif %}
+
+      <div style="display: flex; flex-direction: column; gap: 0.5rem; text-align: left; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-subtle); font-size: 0.9rem;">
+        <a href="{{ url_for('orders') }}" class="dropdown-item">📦 My Order Archives</a>
+        <a href="{{ url_for('manage_addresses') }}" class="dropdown-item">📍 Delivery Addresses ({{ addresses|length }})</a>
+        <a href="{{ url_for('wishlist') }}" class="dropdown-item">♥ Saved Wishlist</a>
+        {% if user.is_admin %}
+        <a href="{{ url_for('admin_dashboard') }}" class="dropdown-item" style="color: var(--gold-light);">⚙ Admin Control Portal</a>
+        {% endif %}
+        <a href="{{ url_for('logout') }}" class="dropdown-item" style="color: var(--accent-rose);">Sign Out</a>
+      </div>
+    </div>
+
+    <!-- Edit Profile Form -->
+    <div class="card" style="padding: 2.5rem;">
+      <h3 style="font-size: 1.5rem; color: #fff; margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-subtle);">
+        Personal Information & Security
+      </h3>
+
+      <form method="POST" action="{{ url_for('profile') }}">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <input type="text" name="full_name" value="{{ user.full_name }}" required class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone Number</label>
+            <input type="text" name="phone" value="{{ user.phone or '' }}" placeholder="+91 98765 43210" class="form-control">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Email Address (Read-only)</label>
+          <input type="email" value="{{ user.email }}" disabled class="form-control" style="opacity: 0.6; cursor: not-allowed;">
+        </div>
+
+        <div class="form-group" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-subtle);">
+          <label class="form-label">Update Password (Leave blank to keep current)</label>
+          <input type="password" name="new_password" placeholder="Enter new secure password" class="form-control">
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">
+          Save Profile Changes
+        </button>
+      </form>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+
+{% block title %}Catalog | {{ selected_category.category_name if selected_category else 'All Haute Couture' }} | {{ store_name }}{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2rem; padding-bottom: 5rem;">
+
+  <!-- Catalog Header Banner -->
+  <div style="margin-bottom: 3rem; text-align: center;">
+    <span class="section-subtitle">
+      {{ selected_category.category_name if selected_category else 'EXCLUSIVE READY-TO-WEAR' }}
+    </span>
+    <h1 class="section-title" style="font-size: 3rem; margin-bottom: 0.75rem;">
+      {{ selected_category.category_name if selected_category else 'The Couture Gallery' }}
+    </h1>
+    <p style="color: var(--text-secondary); max-width: 600px; margin: 0 auto;">
+      {{ selected_category.description if selected_category else 'Explore our complete repertoire of fine garments, crafted from the world\'s most precious textiles.' }}
+    </p>
+  </div>
+
+  <!-- Layout: Sidebar Filter + Product Grid -->
+  <div style="display: grid; grid-template-columns: 280px 1fr; gap: 2.5rem; align-items: start;">
+    
+    <!-- Sidebar Filters -->
+    <aside class="card" style="padding: 1.5rem; position: sticky; top: 6rem;">
+      <div class="flex-between" style="margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-subtle);">
+        <h3 style="font-size: 1.2rem; color: #fff;">Filters</h3>
+        <a href="{{ url_for('product_catalog') }}" style="font-size: 0.78rem; color: var(--gold-light); text-decoration: underline;">Reset All</a>
+      </div>
+
+      <form method="GET" action="{{ url_for('product_catalog') }}" id="filterForm">
+        
+        <!-- Search Input -->
+        <div class="form-group">
+          <label class="form-label">Search Garments</label>
+          <div style="position: relative;">
+            <input type="text" name="q" value="{{ search_query }}" placeholder="E.g. Silk, Velvet, Tuxedo..." class="form-control">
+          </div>
+        </div>
+
+        <!-- Category Filter -->
+        <div class="form-group" style="margin-top: 1.5rem;">
+          <label class="form-label">Collection</label>
+          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.88rem; color: var(--text-secondary); cursor: pointer;">
+              <input type="radio" name="category" value="" {% if not selected_category %}checked{% endif %} onchange="document.getElementById('filterForm').submit()">
+              All Collections
+            </label>
+            {% for cat in categories %}
+            <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.88rem; color: var(--text-secondary); cursor: pointer;">
+              <input type="radio" name="category" value="{{ cat.slug }}" {% if selected_category and selected_category.slug == cat.slug %}checked{% endif %} onchange="document.getElementById('filterForm').submit()">
+              {{ cat.category_name }}
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Curated Badge Filter -->
+        <div class="form-group" style="margin-top: 1.5rem;">
+          <label class="form-label">Collection Tags</label>
+          <div style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
+            <a href="{{ url_for('product_catalog', category=selected_category.slug if selected_category else None, badge='BESTSELLER') }}" 
+               class="badge {% if badge_filter == 'BESTSELLER' %}badge-gold{% else %}badge-dark{% endif %}">
+              Bestseller
+            </a>
+            <a href="{{ url_for('product_catalog', category=selected_category.slug if selected_category else None, badge='NEW') }}" 
+               class="badge {% if badge_filter == 'NEW' %}badge-gold{% else %}badge-dark{% endif %}">
+              New Arrival
+            </a>
+            <a href="{{ url_for('product_catalog', category=selected_category.slug if selected_category else None, badge='LUXE') }}" 
+               class="badge {% if badge_filter == 'LUXE' %}badge-gold{% else %}badge-dark{% endif %}">
+              Luxe
+            </a>
+            <a href="{{ url_for('product_catalog', category=selected_category.slug if selected_category else None, badge='TRENDING') }}" 
+               class="badge {% if badge_filter == 'TRENDING' %}badge-gold{% else %}badge-dark{% endif %}">
+              Trending
+            </a>
+          </div>
+        </div>
+
+        <!-- Price Range -->
+        <div class="form-group" style="margin-top: 1.5rem;">
+          <label class="form-label">Price Range ({{ currency_symbol }})</label>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <input type="number" name="min_price" placeholder="Min" value="{{ request.args.get('min_price', '') }}" class="form-control" style="padding: 0.5rem;">
+            <span style="color: var(--text-muted);">-</span>
+            <input type="number" name="max_price" placeholder="Max" value="{{ request.args.get('max_price', '') }}" class="form-control" style="padding: 0.5rem;">
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-sm" style="width: 100%; margin-top: 1rem;">
+          Apply Filters
+        </button>
+      </form>
+    </aside>
+
+    <!-- Products Content Area -->
+    <div>
+      <!-- Top Bar: Result count & Sort Dropdown -->
+      <div class="flex-between" style="background: var(--bg-surface); padding: 1rem 1.5rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); margin-bottom: 2rem;">
+        <div style="font-size: 0.9rem; color: var(--text-secondary);">
+          Showing <strong style="color: #fff;">{{ product_count }}</strong> luxury pieces
+          {% if search_query %} for "<span style="color: var(--gold-light);">{{ search_query }}</span>"{% endif %}
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <label style="font-size: 0.85rem; color: var(--text-muted);">Sort By:</label>
+          <select name="sort" class="form-control" style="width: auto; padding: 0.4rem 0.8rem; font-size: 0.85rem;" onchange="location = this.value;">
+            <option value="{{ url_for('product_catalog', category=selected_category.slug if selected_category else None, q=search_query, sort='featured') }}" {% if sort_by == 'featured' %}selected{% endif %}>Featured</option>
+            <option value="{{ url_for('product_catalog', category=selected_category.slug if selected_category else None, q=search_query, sort='newest') }}" {% if sort_by == 'newest' %}selected{% endif %}>Newest Drops</option>
+            <option value="{{ url_for('product_catalog', category=selected_category.slug if selected_category else None, q=search_query, sort='price_asc') }}" {% if sort_by == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
+            <option value="{{ url_for('product_catalog', category=selected_category.slug if selected_category else None, q=search_query, sort='price_desc') }}" {% if sort_by == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
+            <option value="{{ url_for('product_catalog', category=selected_category.slug if selected_category else None, q=search_query, sort='rating') }}" {% if sort_by == 'rating' %}selected{% endif %}>Top Rated</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Products Grid -->
+      {% if products %}
+      <div class="products-grid">
+        {% for prod in products %}
+        <div class="product-card">
+          <div class="product-image-box">
+            <img src="{{ prod.image_url }}" alt="{{ prod.product_name }}" loading="lazy">
+            
+            <div class="product-badges">
+              {% if prod.badge %}
+              <span class="badge badge-gold">{{ prod.badge }}</span>
+              {% endif %}
+              {% if prod.discount_percent > 0 %}
+              <span class="badge badge-dark">-{{ prod.discount_percent }}%</span>
+              {% endif %}
+            </div>
+
+            <button class="wishlist-toggle-btn {% if prod.product_id in user_wishlist_pids %}active{% endif %}" data-wishlist-toggle="{{ prod.product_id }}" title="Wishlist">
+              {% if prod.product_id in user_wishlist_pids %}♥{% else %}♡{% endif %}
+            </button>
+
+            <div class="product-quick-actions">
+              <button class="btn btn-secondary btn-sm" style="flex: 1;" data-quickview-id="{{ prod.product_id }}">
+                Quick View
+              </button>
+              {% if prod.variants and prod.variants|length > 0 %}
+              <button class="btn btn-primary btn-sm" onclick="addToCartAjax({{ prod.variants[0].variant_id }}, 1)">
+                + Bag
+              </button>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="product-card-body">
+            <div class="product-category">{{ prod.category.category_name }}</div>
+            <a href="{{ url_for('product_detail', pid=prod.product_id) }}">
+              <h3 class="product-title">{{ prod.product_name }}</h3>
+            </a>
+
+            <div class="product-card-rating">
+              <span class="stars">★★★★★</span>
+              <span>{{ prod.rating }} ({{ prod.reviews_count }})</span>
+            </div>
+
+            <div class="product-price-row">
+              <span class="price-current">{{ currency_symbol }}{{ '%.2f'|format(prod.base_price) }}</span>
+              {% if prod.original_price %}
+              <span class="price-original">{{ currency_symbol }}{{ '%.2f'|format(prod.original_price) }}</span>
+              <span class="price-discount">{{ prod.discount_percent }}% OFF</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <!-- Empty State -->
+      <div class="card" style="text-align: center; padding: 5rem 2rem;">
+        <div style="font-size: 3.5rem; margin-bottom: 1rem; opacity: 0.5;">✦</div>
+        <h3 style="font-size: 1.75rem; color: #fff; margin-bottom: 0.5rem;">No Pieces Found</h3>
+        <p style="color: var(--text-secondary); max-width: 450px; margin: 0 auto 1.5rem auto;">
+          We could not find any items matching your active filter criteria. Try resetting filters or searching with a different keyword.
+        </p>
+        <a href="{{ url_for('product_catalog') }}" class="btn btn-primary">
+          View All Garments
+        </a>
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}

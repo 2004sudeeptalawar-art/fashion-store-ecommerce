@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}Order #{{ order.order_number }} | {{ store_name }}{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2.5rem; padding-bottom: 5rem;">
+
+  <!-- Success Confirmation Banner if just placed -->
+  {% if is_confirmation %}
+  <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: var(--radius-md); padding: 2rem; text-align: center; margin-bottom: 3rem;">
+    <div style="font-size: 3rem; margin-bottom: 0.5rem;">🎉</div>
+    <span class="badge badge-success" style="margin-bottom: 0.5rem;">ORDER CONFIRMED</span>
+    <h1 style="font-size: 2.5rem; color: #fff; margin-bottom: 0.5rem;">Thank You, {{ order.user.full_name }}!</h1>
+    <p style="color: var(--text-secondary); max-width: 500px; margin: 0 auto 1.5rem auto;">
+      Your acquisition has been registered with the Atelier. A confirmation notice has been sent to <strong style="color: #fff;">{{ order.user.email }}</strong>.
+    </p>
+    <div style="display: flex; gap: 1rem; justify-content: center;">
+      <button onclick="window.print()" class="btn btn-secondary btn-sm">🖨 Print Invoice</button>
+      <a href="{{ url_for('product_catalog') }}" class="btn btn-primary btn-sm">Continue Shopping</a>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Order Title Header -->
+  <div class="flex-between" style="margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <span style="font-size: 0.8rem; text-transform: uppercase; color: var(--gold-primary); letter-spacing: 0.1em;">
+        ACQUISITION RECEIPT
+      </span>
+      <h2 style="font-size: 2.2rem; color: #fff; margin: 0.2rem 0;">
+        Order #{{ order.order_number }}
+      </h2>
+      <div style="color: var(--text-muted); font-size: 0.85rem;">
+        Placed on {{ order.order_date.strftime('%B %d, %Y at %I:%M %p') }}
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 0.75rem; align-items: center;">
+      <span class="badge {% if order.order_status == 'Delivered' %}badge-success{% elif order.order_status == 'Shipped' %}badge-gold{% else %}badge-warning{% endif %}" style="font-size: 0.85rem; padding: 0.4rem 1rem;">
+        {{ order.order_status }}
+      </span>
+      <button onclick="window.print()" class="btn btn-outline btn-sm">
+        Print Invoice
+      </button>
+    </div>
+  </div>
+
+  <!-- Status Progress Bar Tracker -->
+  <div class="card" style="margin-bottom: 2.5rem; padding: 2rem;">
+    <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.5rem; display: flex; justify-content: space-between;">
+      <span>Tracking Number: <strong style="color: var(--gold-light);">{{ order.tracking_number or 'TRK-PENDING' }}</strong></span>
+      <span>Estimated Delivery: <strong style="color: #fff;">3-5 Business Days</strong></span>
+    </div>
+
+    {% set steps = ['Order Placed', 'Processing', 'Shipped', 'Delivered'] %}
+    {% set current_idx = 0 %}
+    {% if order.order_status == 'Processing' %}{% set current_idx = 1 %}
+    {% elif order.order_status == 'Shipped' %}{% set current_idx = 2 %}
+    {% elif order.order_status == 'Delivered' %}{% set current_idx = 3 %}{% endif %}
+
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); position: relative; gap: 0.5rem; text-align: center;">
+      {% for step in steps %}
+      <div style="display: flex; flex-direction: column; align-items: center; position: relative; z-index: 2;">
+        <div style="width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; margin-bottom: 0.5rem;
+          background: {% if loop.index0 <= current_idx %}var(--gold-gradient){% else %}var(--bg-surface-elevated){% endif %};
+          color: {% if loop.index0 <= current_idx %}#0c0d11{% else %}var(--text-muted){% endif %};
+          border: 2px solid {% if loop.index0 <= current_idx %}var(--gold-primary){% else %}var(--border-subtle){% endif %};">
+          {% if loop.index0 <= current_idx %}✓{% else %}{{ loop.index }}{% endif %}
+        </div>
+        <div style="font-size: 0.82rem; font-weight: 600; color: {% if loop.index0 <= current_idx %}#fff{% else %}var(--text-muted){% endif %};">
+          {{ step }}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Order Details 2-Column Grid -->
+  <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 2.5rem;">
+    
+    <!-- Items in Order -->
+    <div class="card" style="padding: 1.5rem;">
+      <h3 style="font-size: 1.25rem; color: #fff; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-subtle);">
+        Acquired Garments & Pieces
+      </h3>
+
+      <div style="display: flex; flex-direction: column; gap: 1rem;">
+        {% for item in items %}
+        <div class="flex-between" style="padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); align-items: center;">
+          <div style="display: flex; gap: 1rem; align-items: center;">
+            <img src="{{ item.image_url }}" alt="{{ item.product_name }}" style="width: 70px; height: 85px; object-fit: cover; border-radius: var(--radius-sm); background: #111;">
+            <div>
+              <h4 style="font-size: 1.05rem; color: #fff; margin-bottom: 0.2rem;">{{ item.product_name }}</h4>
+              <div style="font-size: 0.8rem; color: var(--text-secondary);">
+                Size: <strong style="color: var(--gold-light);">{{ item.size_label }}</strong> | Color: {{ item.color }}
+              </div>
+              <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">
+                Qty: {{ item.quantity }} × {{ currency_symbol }}{{ '%.2f'|format(item.unit_price) }}
+              </div>
+            </div>
+          </div>
+
+          <div style="font-size: 1.15rem; font-weight: 700; color: var(--gold-light);">
+            {{ currency_symbol }}{{ '%.2f'|format(item.subtotal) }}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Summary & Destination Info -->
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+      
+      <!-- Financial Breakdown -->
+      <div class="card" style="padding: 1.5rem;">
+        <h3 style="font-size: 1.15rem; color: #fff; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-subtle);">
+          Financial Summary
+        </h3>
+
+        <div style="display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.88rem; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-subtle);">
+          <div class="flex-between">
+            <span style="color: var(--text-secondary);">Subtotal</span>
+            <span style="color: #fff;">{{ currency_symbol }}{{ '%.2f'|format(order.subtotal) }}</span>
+          </div>
+          <div class="flex-between">
+            <span style="color: var(--text-secondary);">Tax (5% GST)</span>
+            <span style="color: #fff;">{{ currency_symbol }}{{ '%.2f'|format(order.tax_amount) }}</span>
+          </div>
+          <div class="flex-between">
+            <span style="color: var(--text-secondary);">Express Delivery</span>
+            <span style="color: {% if order.delivery_charge == 0 %}var(--accent-emerald){% else %}#fff{% endif %};">
+              {% if order.delivery_charge == 0 %}FREE{% else %}{{ currency_symbol }}{{ '%.2f'|format(order.delivery_charge) }}{% endif %}
+            </span>
+          </div>
+        </div>
+
+        <div class="flex-between" style="font-size: 1.25rem; font-weight: 700; color: var(--gold-light); margin-bottom: 1rem;">
+          <span>Total Amount</span>
+          <span>{{ currency_symbol }}{{ '%.2f'|format(order.total_amount) }}</span>
+        </div>
+
+        <div style="font-size: 0.8rem; color: var(--text-muted); background: var(--bg-surface-elevated); padding: 0.75rem; border-radius: var(--radius-sm);">
+          Payment Method: <strong style="color: #fff;">{{ order.payment_method }}</strong><br>
+          Status: <strong style="color: {% if order.payment_status == 'Paid' %}var(--accent-emerald){% else %}#fbbf24{% endif %};">{{ order.payment_status }}</strong>
+        </div>
+      </div>
+
+      <!-- Shipping Address Details -->
+      <div class="card" style="padding: 1.5rem;">
+        <h3 style="font-size: 1.15rem; color: #fff; margin-bottom: 0.75rem;">
+          Delivery Destination
+        </h3>
+        <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.6;">
+          {{ order.address_snapshot or (order.address.formatted() if order.address else 'Direct Boutique Delivery') }}
+        </p>
+      </div>
+
+      <a href="{{ url_for('orders') }}" class="btn btn-secondary" style="width: 100%;">
+        ← View All My Orders
+      </a>
+
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

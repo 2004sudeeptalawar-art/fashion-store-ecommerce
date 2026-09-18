@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}500 - Atelier Maintenance | {{ store_name }}{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 7rem 1.5rem; text-align: center;">
+  <span class="badge badge-warning" style="margin-bottom: 1rem;">500 ATELIER ERROR</span>
+  <h1 style="font-size: 4rem; color: #fff; margin-bottom: 1rem;">Internal Studio Error</h1>
+  <p style="color: var(--text-secondary); max-width: 500px; margin: 0 auto 2rem auto; font-size: 1.1rem;">
+    Our engineering concierges have been alerted. Please reload or return to the main gallery.
+  </p>
+  <a href="{{ url_for('home') }}" class="btn btn-primary btn-lg">
+    Return to Atelier Home ➔
+  </a>
+</div>
+{% endblock %}

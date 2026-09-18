@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.product_name }} | {{ store_name }}{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2rem; padding-bottom: 5rem;">
+
+  <!-- Breadcrumbs -->
+  <nav style="display: flex; gap: 0.5rem; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 2rem;">
+    <a href="{{ url_for('home') }}">Home</a> /
+    <a href="{{ url_for('product_catalog', category=product.category.slug) }}">{{ product.category.category_name }}</a> /
+    <span style="color: var(--text-primary);">{{ product.product_name }}</span>
+  </nav>
+
+  <!-- Product Main Section -->
+  <div class="product-detail-grid">
+    
+    <!-- Gallery -->
+    <div class="detail-gallery">
+      <div class="gallery-thumbs">
+        {% for img_url in product.get_image_list() %}
+        <div class="thumb-item {% if loop.first %}active{% endif %}" data-img-src="{{ img_url }}">
+          <img src="{{ img_url }}" alt="{{ product.product_name }} angle {{ loop.index }}">
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="main-image-display">
+        <img id="mainProductDisplay" src="{{ product.image_url }}" alt="{{ product.product_name }}">
+      </div>
+    </div>
+
+    <!-- Product Info & Purchase Form -->
+    <div class="detail-info">
+      <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+        {% if product.badge %}
+        <span class="badge badge-gold">{{ product.badge }}</span>
+        {% endif %}
+        <span class="badge badge-dark">{{ product.category.category_name }}</span>
+      </div>
+
+      <h1 class="detail-title">{{ product.product_name }}</h1>
+      <div class="detail-subtitle">{{ product.subtitle }}</div>
+
+      <!-- Rating & Reviews snippet -->
+      <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem;">
+        <span class="stars" style="font-size: 1.1rem;">★★★★★</span>
+        <span style="font-weight: 600; color: #fff;">{{ product.rating }}</span>
+        <span style="color: var(--text-muted);">({{ product.reviews_count }} verified reviews)</span>
+        <a href="#reviewsSection" style="color: var(--gold-light); font-size: 0.85rem; text-decoration: underline; margin-left: 0.5rem;">Read Reviews</a>
+      </div>
+
+      <!-- Pricing -->
+      <div style="display: flex; align-items: baseline; gap: 1rem; margin-bottom: 1.5rem;">
+        <span id="detailProductPrice" style="font-size: 2.2rem; font-weight: 700; color: var(--gold-light);">
+          {{ currency_symbol }}{{ '%.2f'|format(product.base_price) }}
+        </span>
+        {% if product.original_price %}
+        <span style="font-size: 1.2rem; color: var(--text-muted); text-decoration: line-through;">
+          {{ currency_symbol }}{{ '%.2f'|format(product.original_price) }}
+        </span>
+        <span class="badge badge-outline" style="font-size: 0.85rem;">SAVE {{ product.discount_percent }}%</span>
+        {% endif %}
+      </div>
+
+      <p style="color: var(--text-secondary); line-height: 1.7; margin-bottom: 1.5rem; font-size: 0.95rem;">
+        {{ product.description }}
+      </p>
+
+      <!-- Variants Selection Area -->
+      <div class="variant-picker-section">
+        
+        <!-- Hidden JSON with all variant specifications -->
+        <script type="application/json" id="productVariantsJson">
+          [
+            {% for v in variants %}
+            {
+              "variant_id": {{ v.variant_id }},
+              "size_label": "{{ v.size_label }}",
+              "color": "{{ v.color }}",
+              "color_hex": "{{ v.color_hex }}",
+              "price": {{ v.price }},
+              "stock_quantity": {{ v.stock_quantity }}
+            }{% if not loop.last %},{% endif %}
+            {% endfor %}
+          ]
+        </script>
+
+        <!-- Color Selection -->
+        <div style="margin-bottom: 1.25rem;">
+          <div class="variant-label">
+            <span>Select Color: <strong id="selectedColorName" style="color: #fff;">{{ colors[0].name if colors else 'Default' }}</strong></span>
+          </div>
+          <div class="color-chips">
+            {% for c in colors %}
+            <button type="button" class="color-dot {% if loop.first %}selected{% endif %}" 
+              data-color="{{ c.name }}" 
+              style="background-color: {{ c.hex }};" 
+              title="{{ c.name }}"
+              onclick="document.getElementById('selectedColorName').textContent = '{{ c.name }}'">
+            </button>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Size Selection -->
+        <div>
+          <div class="variant-label">
+            <span>Select Size</span>
+            <a href="#" onclick="event.preventDefault(); showToast('Sizes follow standard European Haute Couture measurements.', 'info');" style="font-size: 0.78rem; color: var(--gold-light); text-decoration: underline;">Size Guide</a>
+          </div>
+          <div class="size-chips">
+            {% for s in sizes %}
+            <button type="button" class="size-chip {% if loop.first %}selected{% endif %}" data-size="{{ s }}">
+              {{ s }}
+            </button>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Inventory Stock Indicator -->
+        <div id="variantStockIndicator" style="font-size: 0.85rem; margin-top: 0.75rem;">
+          {% if product.in_stock %}
+          <span style="color: var(--accent-emerald);">● In Stock & Ready to Dispatch</span>
+          {% else %}
+          <span style="color: var(--accent-rose);">● Currently Out of Stock</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Action Form -->
+      <form id="addToCartForm" onsubmit="event.preventDefault(); addToCartAjax(document.getElementById('selectedVariantId').value, parseInt(document.getElementById('productDetailQty').value));">
+        <input type="hidden" id="selectedVariantId" name="variant_id" value="{{ variants[0].variant_id if variants else '' }}">
+
+        <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 2rem;">
+          <div class="quantity-control">
+            <button type="button" class="qty-btn" onclick="let input = document.getElementById('productDetailQty'); if (input.value > 1) input.value--;">-</button>
+            <input type="number" id="productDetailQty" name="quantity" value="1" min="1" max="10" class="qty-input">
+            <button type="button" class="qty-btn" onclick="let input = document.getElementById('productDetailQty'); input.value++;">+</button>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-lg" style="flex: 1;">
+            Add to Shopping Bag ➔
+          </button>
+
+          <button type="button" class="btn btn-secondary btn-icon btn-lg {% if is_in_wishlist %}active{% endif %}" data-wishlist-toggle="{{ product.product_id }}" title="Wishlist">
+            {% if is_in_wishlist %}♥{% else %}♡{% endif %}
+          </button>
+        </div>
+      </form>
+
+      <!-- Value Props Box -->
+      <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.25rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.82rem;">
+        <div>
+          <strong style="color: #fff; display: block; margin-bottom: 0.2rem;">⚜ Material & Fabric</strong>
+          <span style="color: var(--text-secondary);">{{ product.material_info }}</span>
+        </div>
+        <div>
+          <strong style="color: #fff; display: block; margin-bottom: 0.2rem;">🧼 Garment Care</strong>
+          <span style="color: var(--text-secondary);">{{ product.care_instructions }}</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Client Reviews Section -->
+  <section id="reviewsSection" class="section" style="border-top: 1px solid var(--border-subtle); padding-top: 3.5rem;">
+    <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 3rem;">
+      
+      <!-- Review Overview & Submit Form -->
+      <div>
+        <h3 style="font-size: 1.8rem; color: #fff; margin-bottom: 1rem;">Patron Reviews</h3>
+        <div style="display: flex; align-items: baseline; gap: 1rem; margin-bottom: 1.5rem;">
+          <span style="font-size: 3.5rem; font-weight: 700; font-family: var(--font-serif); color: var(--gold-light);">{{ product.rating }}</span>
+          <div>
+            <div class="stars" style="font-size: 1.25rem;">★★★★★</div>
+            <div style="font-size: 0.85rem; color: var(--text-muted);">Based on {{ product.reviews_count }} verified experiences</div>
+          </div>
+        </div>
+
+        <!-- Write a Review Form -->
+        <div class="card" style="padding: 1.5rem;">
+          <h4 style="font-size: 1.1rem; color: #fff; margin-bottom: 1rem;">Share Your Experience</h4>
+          {% if current_user %}
+          <form method="POST" action="{{ url_for('add_review', pid=product.product_id) }}">
+            <div class="form-group">
+              <label class="form-label">Rating</label>
+              <select name="rating" class="form-control">
+                <option value="5">★★★★★ (5/5) - Masterpiece</option>
+                <option value="4">★★★★☆ (4/5) - Excellent</option>
+                <option value="3">★★★☆☆ (3/5) - Satisfactory</option>
+                <option value="2">★★☆☆☆ (2/5) - Below Expectation</option>
+                <option value="1">★☆☆☆☆ (1/5) - Disappointed</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Headline</label>
+              <input type="text" name="headline" placeholder="E.g. Exquisite tailoring & fit" required class="form-control">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Detailed Review</label>
+              <textarea name="comment" rows="3" placeholder="Describe the fabric, silhouette, and drape..." required class="form-control"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm" style="width: 100%;">Publish Review</button>
+          </form>
+          {% else %}
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+            Please sign in to write an authenticated review.
+          </p>
+          <a href="{{ url_for('login', next=request.url) }}" class="btn btn-secondary btn-sm" style="width: 100%;">Sign In to Review</a>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Reviews Feed -->
+      <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+        {% if reviews %}
+          {% for r in reviews %}
+          <div class="card" style="padding: 1.5rem;">
+            <div class="flex-between" style="margin-bottom: 0.5rem;">
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--gold-gradient); color:#0c0d11; font-weight:700; font-size:0.8rem; display:flex; align-items:center; justify-content:center;">
+                  {{ r.user_name[0] }}
+                </div>
+                <div>
+                  <strong style="color: #fff; font-size: 0.9rem;">{{ r.user_name }}</strong>
+                  {% if r.verified_purchase %}
+                  <span style="font-size: 0.72rem; color: var(--accent-emerald); margin-left: 0.4rem;">✓ Verified Purchase</span>
+                  {% endif %}
+                </div>
+              </div>
+              <span class="stars">{% for _ in range(r.rating) %}★{% endfor %}</span>
+            </div>
+            {% if r.headline %}
+            <h5 style="font-size: 1rem; color: #fff; margin-bottom: 0.4rem;">{{ r.headline }}</h5>
+            {% endif %}
+            <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.5;">{{ r.comment }}</p>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div style="text-align: center; padding: 3rem 0; color: var(--text-muted);">
+            Be the first patron to review this couture piece.
+          </div>
+        {% endif %}
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Related Garments -->
+  {% if related_products %}
+  <section class="section" style="padding-top: 2rem;">
+    <div class="flex-between" style="margin-bottom: 2rem;">
+      <h3 style="font-size: 2rem; color: #fff;">Complementary Pieces</h3>
+      <a href="{{ url_for('product_catalog', category=product.category.slug) }}" class="btn btn-outline btn-sm">View More in {{ product.category.category_name }}</a>
+    </div>
+
+    <div class="products-grid">
+      {% for rel in related_products %}
+      <div class="product-card">
+        <div class="product-image-box">
+          <img src="{{ rel.image_url }}" alt="{{ rel.product_name }}" loading="lazy">
+          <button class="wishlist-toggle-btn" data-wishlist-toggle="{{ rel.product_id }}">♡</button>
+        </div>
+        <div class="product-card-body">
+          <a href="{{ url_for('product_detail', pid=rel.product_id) }}">
+            <h4 class="product-title">{{ rel.product_name }}</h4>
+          </a>
+          <div class="product-price-row">
+            <span class="price-current">{{ currency_symbol }}{{ '%.2f'|format(rel.base_price) }}</span>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+</div>
+{% endblock %}

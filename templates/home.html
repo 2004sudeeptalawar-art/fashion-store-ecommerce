@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+
+{% block title %}{{ store_name }} | Modern Luxury Ready-to-Wear & Haute Couture{% endblock %}
+
+{% block content %}
+
+<!-- Hero Editorial Section -->
+<section class="hero-section">
+  <div class="container">
+    <div class="hero-grid">
+      <div>
+        <div class="hero-tag">
+          <span>✦</span> AUTUMN / WINTER 2026 COUTURE DROP
+        </div>
+        <h1 class="hero-title">
+          The Art of <em>Timeless</em> Elegance.
+        </h1>
+        <p class="hero-description">
+          Engineered with Italian silks, pure Mongolian cashmere, and artisanal tailoring. Designed for those who appreciate uncompromising luxury.
+        </p>
+
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+          <a href="{{ url_for('product_catalog') }}" class="btn btn-primary btn-lg">
+            Explore Autumn Collection ➔
+          </a>
+          <a href="{{ url_for('product_catalog', category='womens-collection') }}" class="btn btn-secondary btn-lg">
+            Women's Couture
+          </a>
+        </div>
+
+        <div class="hero-stats">
+          <div>
+            <div class="stat-number">100%</div>
+            <div class="stat-label">Sustainable Materials</div>
+          </div>
+          <div>
+            <div class="stat-number">4.9 ★</div>
+            <div class="stat-label">Client Satisfaction</div>
+          </div>
+          <div>
+            <div class="stat-number">50K+</div>
+            <div class="stat-label">Worldwide Deliveries</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-media-wrapper">
+        <div class="hero-image-card">
+          <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1000&q=80" alt="Haute Couture Runway Collection">
+        </div>
+
+        <!-- Floating Glass Highlight Badge -->
+        <div class="floating-glass-card">
+          <div style="width: 50px; height: 50px; border-radius: var(--radius-sm); overflow: hidden; background: #111;">
+            <img src="https://images.unsplash.com/photo-1566174053879-31528523f8ae?auto=format&fit=crop&w=150&q=80" alt="Velvet Gown" style="width: 100%; height: 100%; object-fit: cover;">
+          </div>
+          <div>
+            <div style="font-size: 0.72rem; color: var(--gold-light); text-transform: uppercase; font-weight: 700;">★ ICONIC PIECE</div>
+            <div style="font-size: 0.95rem; font-weight: 600; color: #fff;">L'Étoile Velvet Gown</div>
+            <div style="font-size: 0.85rem; color: var(--text-secondary);">Limited Runway Edition</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Value Propositions Strip -->
+<section style="background: var(--bg-surface); border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle); padding: 2.5rem 0;">
+  <div class="container">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 2rem;">
+      <div style="display: flex; align-items: center; gap: 1rem;">
+        <div style="font-size: 1.8rem; color: var(--gold-primary);">✈</div>
+        <div>
+          <h4 style="font-size: 1rem; color: #fff;">Express Global Delivery</h4>
+          <p style="font-size: 0.8rem; color: var(--text-muted);">Fast, carbon-neutral shipping</p>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 1rem;">
+        <div style="font-size: 1.8rem; color: var(--gold-primary);">⚜</div>
+        <div>
+          <h4 style="font-size: 1rem; color: #fff;">100% Certified Luxury</h4>
+          <p style="font-size: 0.8rem; color: var(--text-muted);">Authentic master craftsmanship</p>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 1rem;">
+        <div style="font-size: 1.8rem; color: var(--gold-primary);">↺</div>
+        <div>
+          <h4 style="font-size: 1rem; color: #fff;">Complimentary Returns</h4>
+          <p style="font-size: 0.8rem; color: var(--text-muted);">30-day effortless returns policy</p>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 1rem;">
+        <div style="font-size: 1.8rem; color: var(--gold-primary);">🛡</div>
+        <div>
+          <h4 style="font-size: 1rem; color: #fff;">Concierge Assistance</h4>
+          <p style="font-size: 0.8rem; color: var(--text-muted);">24/7 dedicated personal stylist</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Category Showcase Grid -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-subtitle">DISCOVER BY ATELIER</div>
+      <h2 class="section-title">Curated Collections</h2>
+      <p style="color: var(--text-secondary); font-size: 1rem;">
+        Explore refined silhouettes and tailored garments designed to elevate every occasion.
+      </p>
+    </div>
+
+    <div class="category-grid">
+      {% for cat in categories %}
+      <a href="{{ url_for('product_catalog', category=cat.slug) }}" class="category-card">
+        <img src="{{ cat.image_url }}" alt="{{ cat.category_name }}" loading="lazy">
+        <div class="category-card-content">
+          <h3 class="category-card-title">{{ cat.category_name }}</h3>
+          <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.5rem;">{{ cat.description }}</p>
+          <span class="category-card-count">Explore Collection ➔</span>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Featured Haute Edit Section -->
+<section class="section" style="background: var(--bg-surface);">
+  <div class="container">
+    <div class="flex-between" style="margin-bottom: 2.5rem; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <div class="section-subtitle">THE EDITORIAL SELECTION</div>
+        <h2 class="section-title" style="margin-bottom: 0.5rem;">Featured Garments</h2>
+      </div>
+      <a href="{{ url_for('product_catalog') }}" class="btn btn-outline btn-sm">
+        View Entire Catalog ➔
+      </a>
+    </div>
+
+    <div class="products-grid">
+      {% for prod in featured_products %}
+      <div class="product-card">
+        <div class="product-image-box">
+          <img src="{{ prod.image_url }}" alt="{{ prod.product_name }}" loading="lazy">
+          
+          <div class="product-badges">
+            {% if prod.badge %}
+            <span class="badge badge-gold">{{ prod.badge }}</span>
+            {% endif %}
+            {% if prod.discount_percent > 0 %}
+            <span class="badge badge-dark">-{{ prod.discount_percent }}%</span>
+            {% endif %}
+          </div>
+
+          <button class="wishlist-toggle-btn" data-wishlist-toggle="{{ prod.product_id }}" title="Add to Wishlist">
+            ♡
+          </button>
+
+          <div class="product-quick-actions">
+            <button class="btn btn-secondary btn-sm" style="flex: 1;" data-quickview-id="{{ prod.product_id }}">
+              Quick View
+            </button>
+            {% if prod.variants and prod.variants|length > 0 %}
+            <button class="btn btn-primary btn-sm" onclick="addToCartAjax({{ prod.variants[0].variant_id }}, 1)">
+              + Bag
+            </button>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="product-card-body">
+          <div class="product-category">{{ prod.category.category_name }}</div>
+          <a href="{{ url_for('product_detail', pid=prod.product_id) }}">
+            <h3 class="product-title">{{ prod.product_name }}</h3>
+          </a>
+
+          <div class="product-card-rating">
+            <span class="stars">★★★★★</span>
+            <span>{{ prod.rating }} ({{ prod.reviews_count }})</span>
+          </div>
+
+          <div class="product-price-row">
+            <span class="price-current">{{ currency_symbol }}{{ '%.2f'|format(prod.base_price) }}</span>
+            {% if prod.original_price %}
+            <span class="price-original">{{ currency_symbol }}{{ '%.2f'|format(prod.original_price) }}</span>
+            <span class="price-discount">{{ prod.discount_percent }}% OFF</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Editorial Story Banner -->
+<section style="position: relative; padding: 7rem 0; background: url('https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat; margin: 3rem 0;">
+  <div style="position: absolute; inset: 0; background: rgba(12, 13, 17, 0.82); backdrop-filter: blur(2px);"></div>
+  <div class="container" style="position: relative; z-index: 2; text-align: center; max-width: 800px;">
+    <span class="badge badge-gold" style="margin-bottom: 1.5rem;">ATELIER PHILOSOPHY</span>
+    <h2 style="font-size: 3.5rem; color: #fff; line-height: 1.15; margin-bottom: 1.5rem;">
+      "Luxury is not about standing out, but about being remembered."
+    </h2>
+    <p style="color: var(--text-secondary); font-size: 1.1rem; line-height: 1.7; margin-bottom: 2rem;">
+      Every stitch in our collection undergoes over 40 hours of artisanal hand-crafting. From raw Mulberry silk to double-twisted Egyptian cotton, we source exclusively from sustainable European mills.
+    </p>
+    <a href="{{ url_for('product_catalog') }}" class="btn btn-primary btn-lg">
+      Discover the Collection ➔
+    </a>
+  </div>
+</section>
+
+<!-- Client Testimonials -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-subtitle">VOICES OF DISTINCTION</div>
+      <h2 class="section-title">Client Endorsements</h2>
+      <p style="color: var(--text-secondary); font-size: 1rem;">
+        What our discerning global clientele says about their {{ store_name }} experience.
+      </p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+      {% for rev in recent_reviews %}
+      <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <div style="color: #fbbf24; font-size: 1.1rem; margin-bottom: 0.75rem;">
+            {% for _ in range(rev.rating) %}★{% endfor %}
+          </div>
+          <h4 style="font-size: 1.15rem; color: #fff; margin-bottom: 0.5rem;">"{{ rev.headline }}"</h4>
+          <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6; font-style: italic;">
+            {{ rev.comment }}
+          </p>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-subtle);">
+          <div style="width: 38px; height: 38px; border-radius: 50%; background: var(--gold-gradient); color: #0c0d11; font-weight: 700; display: flex; align-items: center; justify-content: center;">
+            {{ rev.user_name[0] }}
+          </div>
+          <div>
+            <div style="font-weight: 600; font-size: 0.9rem; color: #fff;">{{ rev.user_name }}</div>
+            <div style="font-size: 0.75rem; color: var(--accent-emerald);">✓ Verified Patron</div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% endblock %}

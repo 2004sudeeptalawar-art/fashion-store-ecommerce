@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block title %}Secure Checkout | {{ store_name }}{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2rem; padding-bottom: 5rem;">
+
+  <div style="margin-bottom: 2.5rem;">
+    <h1 style="font-size: 2.75rem; color: #fff; margin-bottom: 0.5rem;">Atelier Checkout</h1>
+    <p style="color: var(--text-secondary);">Complete your delivery and payment details to finalize your acquisition.</p>
+  </div>
+
+  <form method="POST" action="{{ url_for('checkout') }}">
+    <div class="checkout-grid">
+      
+      <!-- Left Column: Address & Payment Selection -->
+      <div style="display: flex; flex-direction: column; gap: 2rem;">
+        
+        <!-- Step 1: Shipping Address -->
+        <div class="card">
+          <div class="flex-between" style="margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-subtle);">
+            <h3 style="font-size: 1.35rem; color: #fff;">1. Delivery Destination</h3>
+            <a href="{{ url_for('manage_addresses') }}" style="font-size: 0.8rem; color: var(--gold-light); text-decoration: underline;">Manage Address Book</a>
+          </div>
+
+          {% if addresses %}
+          <div style="margin-bottom: 1.5rem;">
+            <label class="form-label" style="margin-bottom: 0.75rem;">Select Saved Address:</label>
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+              {% for addr in addresses %}
+              <label class="address-selection-card flex {% if addr.is_default or loop.first %}selected{% endif %}" style="gap: 1rem; align-items: flex-start; cursor: pointer;">
+                <input type="radio" name="address_id" value="{{ addr.address_id }}" {% if addr.is_default or loop.first %}checked{% endif %} style="margin-top: 0.3rem;" onclick="document.getElementById('newAddressForm').style.display = 'none';">
+                <div style="flex: 1;">
+                  <div style="font-weight: 600; color: #fff; font-size: 0.95rem;">
+                    {{ addr.full_name }} <span class="badge badge-dark" style="font-size: 0.65rem; margin-left: 0.5rem;">{{ addr.address_type }}</span>
+                  </div>
+                  <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.2rem;">
+                    {{ addr.address_line }}, {{ addr.city }}, {{ addr.state }} - {{ addr.pincode }}
+                  </div>
+                  <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">
+                    Phone: {{ addr.phone }}
+                  </div>
+                </div>
+              </label>
+              {% endfor %}
+
+              <!-- Option to add a new address -->
+              <label class="address-selection-card flex" style="gap: 1rem; align-items: center; cursor: pointer;">
+                <input type="radio" name="address_id" value="new" onclick="document.getElementById('newAddressForm').style.display = 'block';">
+                <span style="font-weight: 500; color: var(--gold-light);">+ Deliver to a Different / New Address</span>
+              </label>
+            </div>
+          </div>
+          {% endif %}
+
+          <!-- New Address Form (Visible if no saved address or if 'new' is chosen) -->
+          <div id="newAddressForm" style="display: {% if not addresses %}block{% else %}none{% endif %}; background: var(--bg-surface-elevated); padding: 1.5rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+            <h4 style="font-size: 1.1rem; color: #fff; margin-bottom: 1rem;">Enter Delivery Details</h4>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="form-group">
+                <label class="form-label">Full Name *</label>
+                <input type="text" name="full_name" value="{{ current_user.full_name if current_user else '' }}" placeholder="Receiver's name" class="form-control">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Phone Number *</label>
+                <input type="text" name="phone" value="{{ current_user.phone if current_user else '' }}" placeholder="Mobile number" class="form-control">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Street Address & Residence *</label>
+              <input type="text" name="address_line" placeholder="Apartment / Suite, Street address" class="form-control">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+              <div class="form-group">
+                <label class="form-label">City *</label>
+                <input type="text" name="city" placeholder="E.g. Mumbai" class="form-control">
+              </div>
+              <div class="form-group">
+                <label class="form-label">State / Province</label>
+                <input type="text" name="state" placeholder="State" class="form-control">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Postal PIN Code *</label>
+                <input type="text" name="pincode" placeholder="6-digit PIN" class="form-control">
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Step 2: Payment Method -->
+        <div class="card">
+          <h3 style="font-size: 1.35rem; color: #fff; margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-subtle);">
+            2. Payment Method
+          </h3>
+
+          <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <label class="address-selection-card flex selected" style="gap: 1rem; align-items: center; cursor: pointer;">
+              <input type="radio" name="payment_method" value="Cash on Delivery" checked>
+              <div>
+                <strong style="color: #fff; display: block;">Cash / Card on Delivery (COD)</strong>
+                <span style="font-size: 0.8rem; color: var(--text-muted);">Pay securely at your doorstep upon luxury inspection.</span>
+              </div>
+            </label>
+
+            <label class="address-selection-card flex" style="gap: 1rem; align-items: center; cursor: pointer;">
+              <input type="radio" name="payment_method" value="Credit/Debit Card (Demo)">
+              <div>
+                <strong style="color: #fff; display: block;">Credit / Debit Card (Visa, Mastercard, Amex)</strong>
+                <span style="font-size: 0.8rem; color: var(--text-muted);">Encrypted instant authorization.</span>
+              </div>
+            </label>
+
+            <label class="address-selection-card flex" style="gap: 1rem; align-items: center; cursor: pointer;">
+              <input type="radio" name="payment_method" value="UPI / Instant NetBanking">
+              <div>
+                <strong style="color: #fff; display: block;">UPI / Instant Net Banking</strong>
+                <span style="font-size: 0.8rem; color: var(--text-muted);">Google Pay, PhonePe, Paytm, or major banks.</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Order Review & Placement -->
+      <div class="card" style="position: sticky; top: 6rem; height: fit-content;">
+        <h3 style="font-size: 1.35rem; color: #fff; margin-bottom: 1.25rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-subtle);">
+          Items in Acquisition ({{ cart_items|length }})
+        </h3>
+
+        <!-- Items Mini List -->
+        <div style="display: flex; flex-direction: column; gap: 0.75rem; max-height: 240px; overflow-y: auto; margin-bottom: 1.5rem; padding-right: 0.5rem;">
+          {% for it in cart_items %}
+          <div class="flex-between" style="font-size: 0.85rem; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.04);">
+            <div style="display: flex; gap: 0.75rem; align-items: center;">
+              <img src="{{ it.variant.product.image_url }}" alt="" style="width: 42px; height: 50px; object-fit: cover; border-radius: var(--radius-sm);">
+              <div>
+                <div style="color: #fff; font-weight: 500;">{{ it.variant.product.product_name }}</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">Qty: {{ it.quantity }} | {{ it.variant.size_label }} ({{ it.variant.color }})</div>
+              </div>
+            </div>
+            <div style="font-weight: 600; color: var(--gold-light);">
+              {{ currency_symbol }}{{ '%.2f'|format(it.item_subtotal) }}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- Calculation Lines -->
+        <div style="display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.88rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-subtle);">
+          <div class="flex-between">
+            <span style="color: var(--text-secondary);">Subtotal</span>
+            <span style="color: #fff; font-weight: 600;">{{ currency_symbol }}{{ '%.2f'|format(subtotal) }}</span>
+          </div>
+          <div class="flex-between">
+            <span style="color: var(--text-secondary);">Tax & Duties (5% GST)</span>
+            <span style="color: #fff; font-weight: 600;">{{ currency_symbol }}{{ '%.2f'|format(tax_amount) }}</span>
+          </div>
+          <div class="flex-between">
+            <span style="color: var(--text-secondary);">Express Delivery</span>
+            <span style="color: {% if delivery_charge == 0 %}var(--accent-emerald){% else %}#fff{% endif %}; font-weight: 600;">
+              {% if delivery_charge == 0 %}FREE{% else %}{{ currency_symbol }}{{ '%.2f'|format(delivery_charge) }}{% endif %}
+            </span>
+          </div>
+        </div>
+
+        <div class="flex-between" style="margin-bottom: 2rem;">
+          <span style="font-size: 1.1rem; color: #fff; font-weight: 600;">Grand Total</span>
+          <span style="font-size: 1.75rem; font-weight: 700; color: var(--gold-light);">{{ currency_symbol }}{{ '%.2f'|format(grand_total) }}</span>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
+          Confirm & Place Order ➔
+        </button>
+
+        <p style="font-size: 0.72rem; color: var(--text-muted); text-align: center; margin-top: 1rem;">
+          By placing your order, you agree to {{ store_name }}'s Terms of Luxury Sale and Returns Policy.
+        </p>
+      </div>
+
+    </div>
+  </form>
+
+</div>
+{% endblock %}

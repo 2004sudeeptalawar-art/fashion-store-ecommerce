@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}My Wishlist | {{ store_name }}{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2.5rem; padding-bottom: 5rem;">
+
+  <div style="margin-bottom: 2.5rem;">
+    <span class="section-subtitle">SAVED CURATIONS</span>
+    <h1 style="font-size: 2.75rem; color: #fff; margin-bottom: 0.5rem;">My Private Wishlist</h1>
+    <p style="color: var(--text-secondary);">Your saved haute couture garments and accessories.</p>
+  </div>
+
+  {% if products %}
+  <div class="products-grid">
+    {% for prod in products %}
+    <div class="product-card">
+      <div class="product-image-box">
+        <img src="{{ prod.image_url }}" alt="{{ prod.product_name }}">
+        
+        <div class="product-badges">
+          {% if prod.badge %}
+          <span class="badge badge-gold">{{ prod.badge }}</span>
+          {% endif %}
+        </div>
+
+        <button class="wishlist-toggle-btn active" data-wishlist-toggle="{{ prod.product_id }}" title="Remove from Wishlist">
+          ♥
+        </button>
+
+        <div class="product-quick-actions">
+          <button class="btn btn-secondary btn-sm" style="flex: 1;" data-quickview-id="{{ prod.product_id }}">
+            Quick View
+          </button>
+          {% if prod.variants and prod.variants|length > 0 %}
+          <button class="btn btn-primary btn-sm" onclick="addToCartAjax({{ prod.variants[0].variant_id }}, 1)">
+            + Bag
+          </button>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="product-card-body">
+        <div class="product-category">{{ prod.category.category_name }}</div>
+        <a href="{{ url_for('product_detail', pid=prod.product_id) }}">
+          <h3 class="product-title">{{ prod.product_name }}</h3>
+        </a>
+
+        <div class="product-price-row">
+          <span class="price-current">{{ currency_symbol }}{{ '%.2f'|format(prod.base_price) }}</span>
+          {% if prod.original_price %}
+          <span class="price-original">{{ currency_symbol }}{{ '%.2f'|format(prod.original_price) }}</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="card" style="text-align: center; padding: 5rem 2rem;">
+    <div style="font-size: 3.5rem; margin-bottom: 1rem; opacity: 0.4;">♥</div>
+    <h3 style="font-size: 1.75rem; color: #fff; margin-bottom: 0.5rem;">Your Wishlist is Empty</h3>
+    <p style="color: var(--text-secondary); max-width: 450px; margin: 0 auto 1.5rem auto;">
+      Save pieces you adore while browsing our runway collections to review or acquire them later.
+    </p>
+    <a href="{{ url_for('product_catalog') }}" class="btn btn-primary">
+      Explore Collections
+    </a>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}
