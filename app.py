@@ -19,12 +19,15 @@ CORS(app)
 db.init_app(app)
 
 with app.app_context():
-    db.create_all()
-    # Auto-seed database if empty
     try:
-        seed_database()
+        db.create_all()
+        # Auto-seed database if empty
+        try:
+            seed_database()
+        except Exception as e:
+            print(f"Seed note: {e}")
     except Exception as e:
-        print(f"Seed note: {e}")
+        print(f"Database initialization note: {e}")
 
 # ---------------------------------------------------------
 # Helper Functions & Decorators
